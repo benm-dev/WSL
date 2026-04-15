@@ -407,7 +407,7 @@ void MirroredNetworking::AddNetworkEndpoint(const GUID& NetworkId) noexcept
         auto network = wsl::core::networking::OpenNetwork(NetworkId);
         WSL_LOG("MirroredNetworking::AddNetworkEndpoint [HcnOpenNetwork]", TraceLoggingValue(NetworkId, "networkId"));
 
-        // Query the network properties for diagnostic purposes only.
+        // Query the network properties for diagnostics and loopback endpoint handling.
         wsl::shared::hns::HNSNetwork properties;
         wil::unique_cotaskmem_string networkProperties;
         executionStep = "HcnQueryNetworkProperties";
@@ -455,8 +455,7 @@ void MirroredNetworking::AddNetworkEndpoint(const GUID& NetworkId) noexcept
             // Loopback networks require HostComputeNetwork (not VirtualNetwork) and don't support policies
             hns::HostComputeEndpoint hnsEndpoint{};
             hnsEndpoint.HostComputeNetwork = NetworkId;
-            hnsEndpoint.SchemaVersion.Major = 2;
-            hnsEndpoint.SchemaVersion.Minor = 16;
+            hnsEndpoint.SchemaVersion = hns::c_hostComputeEndpointSchemaVersion;
             endpointSettings = ToJsonW(hnsEndpoint);
         }
         else if (m_config.FirewallConfig.Enabled())
@@ -468,8 +467,7 @@ void MirroredNetworking::AddNetworkEndpoint(const GUID& NetworkId) noexcept
 
             // Assemble the endpoint
             hnsEndpoint.HostComputeNetwork = NetworkId;
-            hnsEndpoint.SchemaVersion.Major = 2;
-            hnsEndpoint.SchemaVersion.Minor = 16;
+            hnsEndpoint.SchemaVersion = hns::c_hostComputeEndpointSchemaVersion;
 
             // Port name policy
             endpointPortNamePolicy.Type = hns::EndpointPolicyType::PortName;

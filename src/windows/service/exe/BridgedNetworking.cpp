@@ -48,8 +48,7 @@ void BridgedNetworking::Initialize()
     }
 
     wsl::shared::hns::HostComputeEndpoint hnsEndpoint{};
-    hnsEndpoint.SchemaVersion.Major = 2;
-    hnsEndpoint.SchemaVersion.Minor = 16;
+    hnsEndpoint.SchemaVersion = wsl::shared::hns::c_hostComputeEndpointSchemaVersion;
     hnsEndpoint.HostComputeNetwork = switchId.value();
     wsl::shared::hns::EndpointPolicy<wsl::shared::hns::PortnameEndpointPolicySetting> endpointPortNamePolicy{};
     endpointPortNamePolicy.Type = wsl::shared::hns::EndpointPolicyType::PortName;

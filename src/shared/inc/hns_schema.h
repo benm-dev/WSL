@@ -55,6 +55,8 @@ struct Version
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Version, Major, Minor);
 };
 
+inline constexpr Version c_hostComputeEndpointSchemaVersion{2, 16};
+
 enum class EndpointPolicyType
 {
     PortName = 9,
@@ -416,9 +418,25 @@ struct HNSNetwork
     NetworkFlags Flags{};
     InterfaceConstraint InterfaceConstraint{};
     bool IsLoopback{};
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(HNSNetwork, ID, Name, SourceMac, DNSSuffix, DNSServerList, DNSDomain, Subnets, Flags, InterfaceConstraint, IsLoopback);
 };
+
+inline void to_json(nlohmann::json& Json, const HNSNetwork& Network)
+{
+    Json = nlohmann::json{
+        {"ID", Network.ID},
+        {"Name", Network.Name},
+        {"SourceMac", Network.SourceMac},
+        {"DNSSuffix", Network.DNSSuffix},
+        {"DNSServerList", Network.DNSServerList},
+        {"DNSDomain", Network.DNSDomain},
+        {"Subnets", Network.Subnets},
+        {"Flags", Network.Flags},
+        {"InterfaceConstraint", Network.InterfaceConstraint},
+    };
+}
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT_FROM_ONLY(
+    HNSNetwork, ID, Name, SourceMac, DNSSuffix, DNSServerList, DNSDomain, Subnets, Flags, InterfaceConstraint, IsLoopback);
 
 enum class NetworkMode
 {

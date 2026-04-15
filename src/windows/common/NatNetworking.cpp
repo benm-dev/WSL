@@ -164,8 +164,7 @@ bool NatNetworking::IsHyperVFirewallSupported(const wsl::core::Config& vmConfig)
 std::pair<wsl::core::networking::EphemeralHcnEndpoint, wsl::shared::hns::HNSEndpoint> NatNetworking::CreateEndpoint(const std::wstring& IpAddress) const
 {
     hns::HostComputeEndpoint hnsEndpoint{};
-    hnsEndpoint.SchemaVersion.Major = 2;
-    hnsEndpoint.SchemaVersion.Minor = 16;
+    hnsEndpoint.SchemaVersion = hns::c_hostComputeEndpointSchemaVersion;
 
     // Network Id
     hnsEndpoint.HostComputeNetwork = m_config.NatNetworkId();
