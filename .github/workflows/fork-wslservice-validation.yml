@@ -1,0 +1,67 @@
+name: Fork WSL service validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "copilot/fork-validate-loopback-endpoint"
+
+concurrency:
+  group: fork-wslservice-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-wslservice:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable long paths
+        shell: pwsh
+        run: git config --system core.longpaths true
+
+      - name: Verify Windows SDK 26100 is installed
+        shell: pwsh
+        run: |
+          $sdkRoot = 'C:\Program Files (x86)\Windows Kits\10\Lib'
+          $sdkVersion = '10.0.26100.0'
+          $sdkPath = Join-Path $sdkRoot $sdkVersion
+
+          if (-not (Test-Path $sdkPath)) {
+            Write-Host 'Installed Windows SDK versions:'
+            if (Test-Path $sdkRoot) {
+              Get-ChildItem $sdkRoot -Name | Sort-Object
+            }
+            throw "Required Windows SDK $sdkVersion is not installed on this runner."
+          }
+
+      - name: Configure CMake
+        shell: pwsh
+        run: >-
+          cmake . --fresh -A x64
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_SYSTEM_VERSION=10.0.26100.0
+          -DSKIP_PACKAGE_SIGNING=TRUE
+          -DOFFICIAL_BUILD=FALSE
+          -DINCLUDE_PACKAGE_STAGE=FALSE
+
+      - name: Build wslservice
+        shell: pwsh
+        run: cmake --build . --config Release --target wslservice --parallel
+
+      - name: Upload CMake logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fork-wslservice-validation-logs
+          path: |
+            CMakeCache.txt
+            CMakeFiles/CMakeOutput.log
+            CMakeFiles/CMakeError.log
