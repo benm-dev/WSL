@@ -28,11 +28,12 @@ jobs:
         shell: pwsh
         run: git config --system core.longpaths true
 
-      - name: Fetch tags and master
+      - name: Fetch tags and master from upstream
         shell: pwsh
         run: |
-          git fetch --force --tags origin
-          git fetch --force origin master:refs/remotes/origin/master
+          git remote add upstream https://github.com/microsoft/WSL.git 2>$null
+          git fetch --force --tags upstream
+          git fetch --force upstream master:refs/remotes/origin/master
 
       - name: Verify Windows SDK 26100 is installed
         shell: pwsh
